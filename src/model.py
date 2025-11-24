@@ -7,25 +7,35 @@ from preprocessor import Preprocessor
 
 class LogisticRegressionModel(): 
 
-    def __init__(self, X_train_processed, y_train): 
+    def __init__(self, X_train_processed, X_test_processed, y_train): 
         self.X_train_processed = X_train_processed
+        self.X_test_processed = X_test_processed
         self.y_train = y_train
         self.params = None
 
     def sigmoid(self, y): 
         return 1/(1+np.e**(-y))
     
-    def gradient_descent(self, start, lr, n_iter):
+    def gradient_descent(self, start, lr, n_iter, method):
         """
         find optimal params using gradient descent
         """
-        x = np.array(start)
-        h = 0.01
-        for _ in range(n_iter):
-            grad = self.gradient(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], h)
-            x = x - lr * grad
-        self.params = x
-        return self.params
+        if method == "numerical":
+            x = np.array(start)
+            h = 0.01
+            for _ in range(n_iter):
+                grad = self.gradient(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], h)
+                x = x - lr * grad
+            self.params = x
+            return self.params
+        else: 
+            x = np.array(start)
+            for _ in range(n_iter):
+                grad = self.gradient_optimised(x)
+                x = x - lr * grad
+            self.params = x
+            return self.params
+
     
     def gradient(self, t1, t2, t3, t4, t5, t6, t7, t8, h): 
         """
@@ -42,6 +52,28 @@ class LogisticRegressionModel():
         dfdt8 = (self.f(t1, t2, t3, t4, t5, t6, t7, t8 + h) - self.f(t1, t2, t3, t4, t5, t6, t7, t8 - h)) / (2 * h)
 
         return np.array([dfdt1, dfdt2, dfdt3, dfdt4, dfdt5, dfdt6, dfdt7, dfdt8])
+    
+    def gradient_optimised(self, params):
+        """
+        calculated gradient analytically 
+        """
+        u = self.sigmoid(np.dot(self.X_train_processed, params))        
+        gradient = self.X_train_processed.T @ (u - self.y_train)
+        return gradient
+    
+    def loss(self, params):
+        """
+        more optimised loss function using vectorisation rather than for loops
+        """
+
+        u = self.sigmoid(np.dot(self.X_train_processed, params))  
+        u = np.clip(u, 1e-15, 1 - 1e-15)
+
+        y = self.y_train 
+
+        lf = np.sum(-y*np.log(u) - (1-y)*np.log(1-u))
+
+        return lf
     
     
     def f(self, t1, t2, t3, t4, t5, t6, t7, t8):
@@ -73,7 +105,7 @@ class LogisticRegressionModel():
 
         self.params
 
-        for array in self.X_train_processed: 
+        for array in self.X_test_processed: 
             prob = self.sigmoid(np.dot(self.params, array))
 
             if prob > threshold: 
@@ -93,11 +125,22 @@ if __name__ == "__main__":
 
     start = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
 
-    lr = LogisticRegressionModel(X_train_processed, y_train)
+    lr = LogisticRegressionModel(X_train_processed, X_test_processed, y_train)
 
-    print(lr.gradient_descent(start=start, lr=0.01, n_iter=100))
+    print(lr.gradient_descent(start=start, lr=0.01, n_iter=100, method="haha"))
+
+    y_pred = lr.predict()
+
+    from sklearn.metrics import roc_auc_score, confusion_matrix
+
+    print(roc_auc_score(y_true=y_test, y_score=y_pred))
+
+    print(confusion_matrix(y_true=y_test, y_pred=y_pred, normalize='true'))
 
 
+## aims by the end of this study session: 
+# - optimise this function 
+# - try to get the optimal parameters 
 
 
 
