@@ -21,14 +21,16 @@ class LogisticRegressionModel():
         find optimal params using gradient descent
         """
         if method == "numerical":
+            print("gradient descent by using numerical gradient ...")
             x = np.array(start)
             h = 0.01
             for _ in range(n_iter):
-                grad = self.gradient(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], h)
+                grad = self.gradient(x, h)
                 x = x - lr * grad
             self.params = x
             return self.params
         else: 
+            print("gradient descent by using analytical gradient ...")
             x = np.array(start)
             for _ in range(n_iter):
                 grad = self.gradient_optimised(x)
@@ -37,21 +39,36 @@ class LogisticRegressionModel():
             return self.params
 
     
-    def gradient(self, t1, t2, t3, t4, t5, t6, t7, t8, h): 
+    def gradient(self, params, h): 
         """
         find gradient with respect to each parameter using central difference method 
+        (update this function to support the new loss function)
         """
+        grad = []
 
-        dfdt1 = (self.f(t1 + h, t2, t3, t4, t5, t6, t7, t8) - self.f(t1 - h, t2, t3, t4, t5, t6, t7, t8)) / (2 * h)
-        dfdt2 = (self.f(t1, t2 + h, t3, t4, t5, t6, t7, t8) - self.f(t1, t2 - h, t3, t4, t5, t6, t7, t8)) / (2 * h)
-        dfdt3 = (self.f(t1, t2, t3 + h, t4, t5, t6, t7, t8) - self.f(t1, t2, t3 - h, t4, t5, t6, t7, t8)) / (2 * h)
-        dfdt4 = (self.f(t1, t2, t3, t4 + h, t5, t6, t7, t8) - self.f(t1, t2, t3, t4 - h, t5, t6, t7, t8)) / (2 * h)
-        dfdt5 = (self.f(t1, t2, t3, t4, t5 + h, t6, t7, t8) - self.f(t1, t2, t3, t4, t5 - h, t6, t7, t8)) / (2 * h)
-        dfdt6 = (self.f(t1, t2, t3, t4, t5, t6 + h, t7, t8) - self.f(t1, t2, t3, t4, t5, t6 - h, t7, t8)) / (2 * h)
-        dfdt7 = (self.f(t1, t2, t3, t4, t5, t6, t7 + h, t8) - self.f(t1, t2, t3, t4, t5, t6, t7 - h, t8)) / (2 * h)
-        dfdt8 = (self.f(t1, t2, t3, t4, t5, t6, t7, t8 + h) - self.f(t1, t2, t3, t4, t5, t6, t7, t8 - h)) / (2 * h)
+        for index in range(len(params)): 
 
-        return np.array([dfdt1, dfdt2, dfdt3, dfdt4, dfdt5, dfdt6, dfdt7, dfdt8])
+            modified1 = params.copy()
+            modified1[index] = modified1[index] + h
+
+            modified2 = params.copy()
+            modified2[index] = modified2[index] - h
+
+            grad.append(
+                (self.loss(modified1) - self.loss(modified2)) / (2*h)
+            )
+
+
+        # dfdt1 = (self.f(t1 + h, t2, t3, t4, t5, t6, t7, t8) - self.f(t1 - h, t2, t3, t4, t5, t6, t7, t8)) / (2 * h)
+        # dfdt2 = (self.f(t1, t2 + h, t3, t4, t5, t6, t7, t8) - self.f(t1, t2 - h, t3, t4, t5, t6, t7, t8)) / (2 * h)
+        # dfdt3 = (self.f(t1, t2, t3 + h, t4, t5, t6, t7, t8) - self.f(t1, t2, t3 - h, t4, t5, t6, t7, t8)) / (2 * h)
+        # dfdt4 = (self.f(t1, t2, t3, t4 + h, t5, t6, t7, t8) - self.f(t1, t2, t3, t4 - h, t5, t6, t7, t8)) / (2 * h)
+        # dfdt5 = (self.f(t1, t2, t3, t4, t5 + h, t6, t7, t8) - self.f(t1, t2, t3, t4, t5 - h, t6, t7, t8)) / (2 * h)
+        # dfdt6 = (self.f(t1, t2, t3, t4, t5, t6 + h, t7, t8) - self.f(t1, t2, t3, t4, t5, t6 - h, t7, t8)) / (2 * h)
+        # dfdt7 = (self.f(t1, t2, t3, t4, t5, t6, t7 + h, t8) - self.f(t1, t2, t3, t4, t5, t6, t7 - h, t8)) / (2 * h)
+        # dfdt8 = (self.f(t1, t2, t3, t4, t5, t6, t7, t8 + h) - self.f(t1, t2, t3, t4, t5, t6, t7, t8 - h)) / (2 * h)
+
+        return np.array(grad)
     
     def gradient_optimised(self, params):
         """
@@ -127,7 +144,7 @@ if __name__ == "__main__":
 
     lr = LogisticRegressionModel(X_train_processed, X_test_processed, y_train)
 
-    print(lr.gradient_descent(start=start, lr=0.01, n_iter=100, method="haha"))
+    print(lr.gradient_descent(start=start, lr=0.01, n_iter=100, method="numerical"))
 
     y_pred = lr.predict()
 
