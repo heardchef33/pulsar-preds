@@ -25,7 +25,7 @@ class LogisticRegressionModel():
             x = np.array(start)
             h = 0.01
             for _ in range(n_iter):
-                grad = self.gradient(x, h)
+                grad = self.gradient_num(x, h)
                 x = x - lr * grad
             self.params = x
             return self.params
@@ -39,7 +39,7 @@ class LogisticRegressionModel():
             return self.params
 
     
-    def gradient(self, params, h): 
+    def gradient_num(self, params, h): 
         """
         find gradient with respect to each parameter using central difference method 
         (update this function to support the new loss function)
@@ -91,25 +91,6 @@ class LogisticRegressionModel():
         lf = np.sum(-y*np.log(u) - (1-y)*np.log(1-u))
 
         return lf
-    
-    
-    def f(self, t1, t2, t3, t4, t5, t6, t7, t8):
-
-        loss_func = []
-
-        z = np.array([t1, t2, t3, t4, t5, t6, t7, t8])
-
-        for index in range(len(self.X_train_processed)): 
-
-            h = self.sigmoid(np.dot(z, self.X_train_processed[index]))
-
-            h = np.clip(h, 1e-15, 1 - 1e-15)
-
-            y = np.array(self.y_train)[index]
-
-            loss_func.append(-np.log(h**y*(1-h)**(1-y)))
-
-        return np.sum(loss_func)
 
     def predict(self): 
         """
