@@ -37,6 +37,43 @@ class LogisticRegressionModel():
                 x = x - lr * grad
             self.params = x
             return self.params
+        
+    def newton_raphson(self, start, n_iter):
+        """
+        approach find the jacobian of the gradient which is the hessian by treating the gradient 
+        as a vector of functions 
+        """
+
+    def jacobian(self, params, h):
+        """
+        the jacobian in netwon-raphson is the gradient of each component in the gradient vector
+        """
+
+        # jac = []
+
+        # grad_vector = self.gradient_optimised(params) # the gradient vector 
+
+        # for component in grad_vector: 
+
+        #     component_grad = []
+
+        #     for index in range(len(params)): 
+
+        grad = []
+
+        for index in range(len(params)): 
+
+            modified1 = params.copy()
+            modified1[index] = modified1[index] + h
+
+            modified2 = params.copy()
+            modified2[index] = modified2[index] - h
+
+            grad.append(
+                (self.gradient_optimised(modified1) - self.gradient_optimised(modified2)) / (2*h)
+            )
+        
+        return grad
 
     
     def gradient_num(self, params, h): 
@@ -125,15 +162,19 @@ if __name__ == "__main__":
 
     lr = LogisticRegressionModel(X_train_processed, X_test_processed, y_train)
 
-    print(lr.gradient_descent(start=start, lr=0.01, n_iter=100, method="numerical"))
+    print(len(lr.jacobian(start, h=0.01)[0]))
 
-    y_pred = lr.predict()
 
-    from sklearn.metrics import roc_auc_score, confusion_matrix
 
-    print(roc_auc_score(y_true=y_test, y_score=y_pred))
+    # print(lr.gradient_descent(start=start, lr=0.01, n_iter=100, method="numerical"))
 
-    print(confusion_matrix(y_true=y_test, y_pred=y_pred, normalize='true'))
+    # y_pred = lr.predict()
+
+    # from sklearn.metrics import roc_auc_score, confusion_matrix
+
+    # print(roc_auc_score(y_true=y_test, y_score=y_pred))
+
+    # print(confusion_matrix(y_true=y_test, y_pred=y_pred, normalize='true'))
 
 
 ## aims by the end of this study session: 
