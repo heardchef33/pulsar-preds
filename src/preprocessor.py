@@ -10,7 +10,7 @@ class Preprocessor():
 
     def split(self, df):
 
-        X = df[df.columns[0:-1]]
+        X = df[df.columns[1:-1]]
 
         y = df[df.columns[-1]]
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     X_train_processed, X_test_processed, y_train, y_test = Preprocessor(df).main()
 
-    print(X_test_processed)
+    print(len(X_test_processed[0]))
 
          
 
