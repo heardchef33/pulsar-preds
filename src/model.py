@@ -13,8 +13,67 @@ class LogisticRegressionModel():
         self.y_train = y_train
         self.params = None
 
+    ## loss function formulation 
+
     def sigmoid(self, y): 
         return 1/(1+np.e**(-y))
+    
+    def loss(self, params):
+        """
+        more optimised loss function using vectorisation rather than for loops
+        """
+
+        u = self.sigmoid(np.dot(self.X_train_processed, params))  
+        u = np.clip(u, 1e-15, 1 - 1e-15)
+
+        y = self.y_train 
+
+        lf = np.sum(-y*np.log(u) - (1-y)*np.log(1-u))
+
+        return lf
+    
+    ## gradient calculation 
+
+    def gradient_num(self, params, h): 
+        """
+        find gradient with respect to each parameter using central difference method 
+        (update this function to support the new loss function)
+        """
+        grad = []
+
+        for index in range(len(params)): 
+
+            modified1 = params.copy()
+            modified1[index] = modified1[index] + h
+
+            modified2 = params.copy()
+            modified2[index] = modified2[index] - h
+
+            grad.append(
+                (self.loss(modified1) - self.loss(modified2)) / (2*h)
+            )
+
+
+        # dfdt1 = (self.f(t1 + h, t2, t3, t4, t5, t6, t7, t8) - self.f(t1 - h, t2, t3, t4, t5, t6, t7, t8)) / (2 * h)
+        # dfdt2 = (self.f(t1, t2 + h, t3, t4, t5, t6, t7, t8) - self.f(t1, t2 - h, t3, t4, t5, t6, t7, t8)) / (2 * h)
+        # dfdt3 = (self.f(t1, t2, t3 + h, t4, t5, t6, t7, t8) - self.f(t1, t2, t3 - h, t4, t5, t6, t7, t8)) / (2 * h)
+        # dfdt4 = (self.f(t1, t2, t3, t4 + h, t5, t6, t7, t8) - self.f(t1, t2, t3, t4 - h, t5, t6, t7, t8)) / (2 * h)
+        # dfdt5 = (self.f(t1, t2, t3, t4, t5 + h, t6, t7, t8) - self.f(t1, t2, t3, t4, t5 - h, t6, t7, t8)) / (2 * h)
+        # dfdt6 = (self.f(t1, t2, t3, t4, t5, t6 + h, t7, t8) - self.f(t1, t2, t3, t4, t5, t6 - h, t7, t8)) / (2 * h)
+        # dfdt7 = (self.f(t1, t2, t3, t4, t5, t6, t7 + h, t8) - self.f(t1, t2, t3, t4, t5, t6, t7 - h, t8)) / (2 * h)
+        # dfdt8 = (self.f(t1, t2, t3, t4, t5, t6, t7, t8 + h) - self.f(t1, t2, t3, t4, t5, t6, t7, t8 - h)) / (2 * h)
+
+        return np.array(grad)
+    
+    def gradient_optimised(self, params):
+        """
+        calculated gradient analytically 
+        """
+        u = self.sigmoid(np.dot(self.X_train_processed, params))        
+        gradient = self.X_train_processed.T @ (u - self.y_train)
+        return gradient
+
+    ## find parameters using: gradient descent 
     
     def gradient_descent(self, start, lr, n_iter, method):
         """
@@ -37,6 +96,8 @@ class LogisticRegressionModel():
                 x = x - lr * grad
             self.params = x
             return self.params
+    
+    ## find parameters using: newton's method 
         
     def newton_raphson(self, start, n_iter):
         """
@@ -89,66 +150,13 @@ class LogisticRegressionModel():
             )
         
         return grad
-
     
-    def gradient_num(self, params, h): 
-        """
-        find gradient with respect to each parameter using central difference method 
-        (update this function to support the new loss function)
-        """
-        grad = []
-
-        for index in range(len(params)): 
-
-            modified1 = params.copy()
-            modified1[index] = modified1[index] + h
-
-            modified2 = params.copy()
-            modified2[index] = modified2[index] - h
-
-            grad.append(
-                (self.loss(modified1) - self.loss(modified2)) / (2*h)
-            )
-
-
-        # dfdt1 = (self.f(t1 + h, t2, t3, t4, t5, t6, t7, t8) - self.f(t1 - h, t2, t3, t4, t5, t6, t7, t8)) / (2 * h)
-        # dfdt2 = (self.f(t1, t2 + h, t3, t4, t5, t6, t7, t8) - self.f(t1, t2 - h, t3, t4, t5, t6, t7, t8)) / (2 * h)
-        # dfdt3 = (self.f(t1, t2, t3 + h, t4, t5, t6, t7, t8) - self.f(t1, t2, t3 - h, t4, t5, t6, t7, t8)) / (2 * h)
-        # dfdt4 = (self.f(t1, t2, t3, t4 + h, t5, t6, t7, t8) - self.f(t1, t2, t3, t4 - h, t5, t6, t7, t8)) / (2 * h)
-        # dfdt5 = (self.f(t1, t2, t3, t4, t5 + h, t6, t7, t8) - self.f(t1, t2, t3, t4, t5 - h, t6, t7, t8)) / (2 * h)
-        # dfdt6 = (self.f(t1, t2, t3, t4, t5, t6 + h, t7, t8) - self.f(t1, t2, t3, t4, t5, t6 - h, t7, t8)) / (2 * h)
-        # dfdt7 = (self.f(t1, t2, t3, t4, t5, t6, t7 + h, t8) - self.f(t1, t2, t3, t4, t5, t6, t7 - h, t8)) / (2 * h)
-        # dfdt8 = (self.f(t1, t2, t3, t4, t5, t6, t7, t8 + h) - self.f(t1, t2, t3, t4, t5, t6, t7, t8 - h)) / (2 * h)
-
-        return np.array(grad)
-    
-    def gradient_optimised(self, params):
-        """
-        calculated gradient analytically 
-        """
-        u = self.sigmoid(np.dot(self.X_train_processed, params))        
-        gradient = self.X_train_processed.T @ (u - self.y_train)
-        return gradient
-    
-    def loss(self, params):
-        """
-        more optimised loss function using vectorisation rather than for loops
-        """
-
-        u = self.sigmoid(np.dot(self.X_train_processed, params))  
-        u = np.clip(u, 1e-15, 1 - 1e-15)
-
-        y = self.y_train 
-
-        lf = np.sum(-y*np.log(u) - (1-y)*np.log(1-u))
-
-        return lf
+    # predictions
 
     def predict(self): 
         """
         find predictions 
         """
-
         threshold = 0.5
 
         predictions = []
