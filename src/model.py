@@ -96,6 +96,12 @@ class LogisticRegressionModel():
                 x = x - lr * grad
             self.params = x
             return self.params
+        
+        ## add convergence graph 
+        ## y-axis value of the loss function
+        ## no. of iterations
+        ## legend: learning rate, numerical vs different
+
     
     ## find parameters using: newton's method 
         
@@ -117,6 +123,13 @@ class LogisticRegressionModel():
         print("params found!")
 
         self.params = result
+
+        ## add convergence graph 
+
+        ## add convergence graph 
+        ## y-axis value of the loss function
+        ## no. of iterations
+        ## legend: learning rate, numerical vs different
 
         return self.params
 
