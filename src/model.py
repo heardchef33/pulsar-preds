@@ -43,6 +43,21 @@ class LogisticRegressionModel():
         approach find the jacobian of the gradient which is the hessian by treating the gradient 
         as a vector of functions 
         """
+        print("running newton's method")
+
+        h = 0.01 # define accuract of numerical differentiation
+
+        result = start 
+
+        for _ in range(n_iter): 
+
+            result = result - np.linalg.inv(self.jacobian(result, h)) @ self.gradient_optimised(result)
+        
+        print("params found!")
+
+        self.params = result
+
+        return self.params
 
     def jacobian(self, params, h):
         """
@@ -162,19 +177,23 @@ if __name__ == "__main__":
 
     lr = LogisticRegressionModel(X_train_processed, X_test_processed, y_train)
 
-    print(len(lr.jacobian(start, h=0.01)[0]))
+    # print(len(lr.jacobian(start, h=0.01)[0]))
+
+    print(lr.newton_raphson(start=start, n_iter=100))
+
+    print(lr.params)
 
 
 
-    # print(lr.gradient_descent(start=start, lr=0.01, n_iter=100, method="numerical"))
+    # print(lr.gradient_descent(start=start, lr=0.01, n_iter=100, method="hehe"))
 
-    # y_pred = lr.predict()
+    y_pred = lr.predict()
 
-    # from sklearn.metrics import roc_auc_score, confusion_matrix
+    from sklearn.metrics import roc_auc_score, confusion_matrix
 
-    # print(roc_auc_score(y_true=y_test, y_score=y_pred))
+    print(roc_auc_score(y_true=y_test, y_score=y_pred))
 
-    # print(confusion_matrix(y_true=y_test, y_pred=y_pred, normalize='true'))
+    print(confusion_matrix(y_true=y_test, y_pred=y_pred, normalize='true'))
 
 
 ## aims by the end of this study session: 
