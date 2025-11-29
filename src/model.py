@@ -2,8 +2,7 @@
 # derivation of mathematics found in the report 
 import numpy as np
 import pandas as pd 
-from preprocessor import Preprocessor
-
+import matplotlib.pyplot as plt
 
 class LogisticRegressionModel(): 
 
@@ -79,28 +78,43 @@ class LogisticRegressionModel():
         """
         find optimal params using gradient descent
         """
+        cost = []
         if method == "numerical":
             print("gradient descent by using numerical gradient ...")
             x = np.array(start)
             h = 0.01
             for _ in range(n_iter):
+                cost.append(self.loss(x))
                 grad = self.gradient_num(x, h)
                 x = x - lr * grad
             self.params = x
-            return self.params
         else: 
             print("gradient descent by using analytical gradient ...")
             x = np.array(start)
             for _ in range(n_iter):
+                cost.append(self.loss(x))
                 grad = self.gradient_optimised(x)
-                x = x - lr * grad
+                if np.abs(grad.T @ grad) < 0.01:
+                    print("found params first")
+                    break
+                else:
+                    x = x - lr * grad
             self.params = x
-            return self.params
         
         ## add convergence graph 
         ## y-axis value of the loss function
         ## no. of iterations
         ## legend: learning rate, numerical vs different
+
+        plt.plot(cost)
+        plt.xlabel("no of iterations")
+        plt.ylabel("cost function")
+        plt.title("cost function vs iterations")
+        plt.grid(True)
+        plt.show()
+
+        return self.params
+
 
     
     ## find parameters using: newton's method 
@@ -114,9 +128,13 @@ class LogisticRegressionModel():
 
         h = 0.01 # define accuract of numerical differentiation
 
+        cost = []
+
         result = start 
 
         for _ in range(n_iter): 
+
+            cost.append(self.loss(result))
 
             result = result - np.linalg.inv(self.jacobian(result, h)) @ self.gradient_optimised(result)
         
@@ -124,12 +142,12 @@ class LogisticRegressionModel():
 
         self.params = result
 
-        ## add convergence graph 
-
-        ## add convergence graph 
-        ## y-axis value of the loss function
-        ## no. of iterations
-        ## legend: learning rate, numerical vs different
+        plt.plot(cost)
+        plt.xlabel("no of iterations")
+        plt.ylabel("cost function")
+        plt.title("cost function vs iterations")
+        plt.grid(True)
+        plt.show()
 
         return self.params
 
@@ -187,6 +205,8 @@ class LogisticRegressionModel():
         return np.array(predictions)
 
 if __name__ == "__main__":
+
+    from preprocessor import Preprocessor
 
     FILE_PATH = '/Users/thananpornsethjinda/Desktop/pulsar-pred/data/pulsar_data.csv'
 
